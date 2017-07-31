@@ -120,12 +120,12 @@ public class LocalBatchingTaskManager extends BaseLoggable implements BatchingTa
 	}
 
 	@Override
-	public RPCFuture<Result> publish(String code) {
+	public RPCFuture<Result> publish(String code, Object param) {
 		BaseRPCFuture<Result> future = new BaseRPCFuture<>();
 		int threadId = (int) (hash.hash(code) & modular);
 		BlockingQueue<CodeAndResultFuture> queue = queues[threadId];
 		synchronized (queue) {
-			queue.add(new CodeAndResultFuture(code, future));
+			queue.add(new CodeAndResultFuture(code, param, future));
 			queue.notify();
 		}
 		return future;

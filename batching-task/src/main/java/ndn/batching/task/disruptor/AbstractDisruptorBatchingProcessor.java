@@ -1,5 +1,6 @@
 package ndn.batching.task.disruptor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,11 @@ public abstract class AbstractDisruptorBatchingProcessor implements BatchingProc
 
 	@Override
 	public void process(String code, List<CodeAndResultFuture> tasks) {
-		List<Result> results = process(code, tasks.size());
+		List<Object> params = new ArrayList<>(tasks.size());
+		for (CodeAndResultFuture task : tasks) {
+			params.add(task.getParam());
+		}
+		List<Result> results = _process(code, params);
 		if (results.size() < tasks.size()) {
 			throw new RuntimeException("results size must equal tasks size");
 		}
@@ -27,6 +32,12 @@ public abstract class AbstractDisruptorBatchingProcessor implements BatchingProc
 		}
 	}
 
-	protected abstract List<Result> process(String code, int size);
+	/**
+	 * 
+	 * @param code
+	 * @param params a list params by time order
+	 * @return list result by order of params
+	 */
+	protected abstract List<Result> _process(String code, List<Object> params);
 
 }

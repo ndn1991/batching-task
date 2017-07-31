@@ -10,5 +10,6 @@ import ndn.batching.task.Result;
 @EqualsAndHashCode(of = { "code" })
 public class CodeAndResultFuture {
 	private final String code;
+	private final Object param;
 	private final BaseRPCFuture<Result> future;
 }

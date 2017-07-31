@@ -1,5 +1,7 @@
 package ndn.batching.task;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -8,7 +10,8 @@ import java.util.concurrent.Executors;
 import com.nhb.common.async.Callback;
 import com.nhb.common.async.RPCFuture;
 
-import ndn.batching.task.disruptor.DisruptorBatchingProcessor;
+import ndn.batching.task.base.BaseResult;
+import ndn.batching.task.disruptor.AbstractDisruptorBatchingProcessor;
 import ndn.batching.task.disruptor.HandleCompleteWorkerPool;
 import ndn.batching.task.hash.FnvHash;
 import ndn.batching.task.hash.Hash;
@@ -20,26 +23,20 @@ public class Test {
 		Hash hash = new FnvHash();
 		BatchingTaskManager batching = new LocalBatchingTaskManager(hash, 4);
 		HandleCompleteWorkerPool workerPool = new HandleCompleteWorkerPool(4, 4096).start();
-		batching.setBatchingProcessor(new DisruptorBatchingProcessor(workerPool) {
-
+		batching.setBatchingProcessor(new AbstractDisruptorBatchingProcessor(workerPool) {
 			@Override
-			protected int process(String code, int size) {
+			protected List<Result> _process(String code, List<Object> params) {
 				try {
 					Thread.sleep(r.nextInt(100));
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				return size > 0 ? size - 1 : 0;
-			}
-
-			@Override
-			protected String successMessage(String code) {
-				return Thread.currentThread().getName() + " - " + code + ": success";
-			}
-
-			@Override
-			protected String failureMessage(String code) {
-				return Thread.currentThread().getName() + " - " + code + ": failure";
+				List<Result> rs = new ArrayList<>();
+				for (Object param : params) {
+					int x = r.nextInt(2);
+					rs.add(new BaseResult(x, Thread.currentThread().getName() + " - " + code + ": " + param + ": " + x));
+				}
+				return rs;
 			}
 		});
 
@@ -48,10 +45,11 @@ public class Test {
 
 		for (int i = 0; i < 100; i++) {
 			final int index = r.nextInt(10);
+			final Object param = i;
 			es.execute(new Runnable() {
 				@Override
 				public void run() {
-					RPCFuture<Result> future = batching.publish(String.valueOf(index));
+					RPCFuture<Result> future = batching.publish(String.valueOf(index), param);
 					future.setCallback(new Callback<Result>() {
 						@Override
 						public void apply(Result result) {
