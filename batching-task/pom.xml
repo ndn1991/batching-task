@@ -46,11 +46,6 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>org.getopt</groupId>
-            <artifactId>fnv-hasing</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
             <groupId>nhb.common</groupId>
             <artifactId>nhb-common-core</artifactId>
             <version>1.2.14</version>

@@ -8,8 +8,8 @@ import ndn.batching.task.Result;
 
 @Data
 @EqualsAndHashCode(of = { "code" })
-public class CodeAndResultFuture {
+public class CodeAndResultFuture<P> {
 	private final String code;
-	private final Object param;
+	private final P param;
 	private final BaseRPCFuture<Result> future;
 }

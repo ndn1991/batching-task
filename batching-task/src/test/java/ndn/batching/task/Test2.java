@@ -11,22 +11,23 @@ import com.nhb.common.async.Callback;
 import com.nhb.common.async.RPCFuture;
 
 import ndn.batching.task.base.BaseResult;
-import ndn.batching.task.disruptor.AbstractDisruptorBatchingPerCodeProcessor;
+import ndn.batching.task.disruptor.AbstractDisruptorBatchingProcessor;
 import ndn.batching.task.disruptor.HandleCompleteWorkerPool;
 import ndn.batching.task.hash.FnvHash;
 import ndn.batching.task.hash.Hash;
 import ndn.batching.task.local.LocalBatchingTaskManager;
 
-public class Test {
+public class Test2 {
 	public static void main(String[] args) throws InterruptedException {
 		Random r = new Random();
 		Hash hash = new FnvHash();
 		BatchingTaskManager<Integer> batching = new LocalBatchingTaskManager<>(hash, 4);
 		HandleCompleteWorkerPool workerPool = new HandleCompleteWorkerPool(4, 4096).start();
-		AbstractDisruptorBatchingPerCodeProcessor<Integer> processor = new AbstractDisruptorBatchingPerCodeProcessor<Integer>(
+		AbstractDisruptorBatchingProcessor<Integer> processor = new AbstractDisruptorBatchingProcessor<Integer>(
 				workerPool) {
 			@Override
-			protected List<Result> _process(String code, List<Integer> params) {
+			protected List<Result> _process(List<Integer> params) {
+				System.out.println("params size: " + params.size());
 				try {
 					Thread.sleep(r.nextInt(100));
 				} catch (InterruptedException e) {
@@ -35,8 +36,7 @@ public class Test {
 				List<Result> rs = new ArrayList<>();
 				for (int param : params) {
 					int x = r.nextInt(2);
-					rs.add(new BaseResult(x,
-							Thread.currentThread().getName() + " - " + code + ": " + param + ": " + x));
+					rs.add(new BaseResult(x, Thread.currentThread().getName() + ": " + param + ": " + x));
 				}
 				return rs;
 			}

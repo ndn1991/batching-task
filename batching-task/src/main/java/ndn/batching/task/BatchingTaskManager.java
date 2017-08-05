@@ -2,10 +2,10 @@ package ndn.batching.task;
 
 import com.nhb.common.async.RPCFuture;
 
-public interface BatchingTaskManager {
-	RPCFuture<Result> publish(String code, Object param);
+public interface BatchingTaskManager<P> {
+	RPCFuture<Result> publish(String code, P param);
 
-	BatchingProcessor getBatchingProcessor();
+	BatchingProcessor<P> getBatchingProcessor();
 
-	void setBatchingProcessor(BatchingProcessor processor);
+	void setBatchingProcessor(BatchingProcessor<P> processor);
 }
